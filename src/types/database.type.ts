@@ -33,39 +33,6 @@ export type Database = {
 	};
 	public: {
 		Tables: {
-			chats: {
-				Row: {
-					id: string;
-					user1_id: string;
-					user2_id: string;
-				};
-				Insert: {
-					id?: string;
-					user1_id: string;
-					user2_id: string;
-				};
-				Update: {
-					id?: string;
-					user1_id?: string;
-					user2_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'chats_user1_id_fkey';
-						columns: ['user1_id'];
-						isOneToOne: false;
-						referencedRelation: 'users';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'chats_user2_id_fkey';
-						columns: ['user2_id'];
-						isOneToOne: false;
-						referencedRelation: 'users';
-						referencedColumns: ['id'];
-					},
-				];
-			};
 			comments: {
 				Row: {
 					content: string;
@@ -117,41 +84,41 @@ export type Database = {
 			};
 			messages: {
 				Row: {
-					chat_id: string;
 					content: string | null;
 					created_at: string;
 					id: string;
 					image: string | null;
+					receiver_id: string;
 					sender_id: string;
 					type: Database['public']['Enums']['message_type'];
 					video: string | null;
 				};
 				Insert: {
-					chat_id: string;
 					content?: string | null;
 					created_at?: string;
 					id?: string;
 					image?: string | null;
+					receiver_id: string;
 					sender_id?: string;
 					type: Database['public']['Enums']['message_type'];
 					video?: string | null;
 				};
 				Update: {
-					chat_id?: string;
 					content?: string | null;
 					created_at?: string;
 					id?: string;
 					image?: string | null;
+					receiver_id?: string;
 					sender_id?: string;
 					type?: Database['public']['Enums']['message_type'];
 					video?: string | null;
 				};
 				Relationships: [
 					{
-						foreignKeyName: 'messages_chat_id_fkey';
-						columns: ['chat_id'];
+						foreignKeyName: 'messages_receiver_id_fkey';
+						columns: ['receiver_id'];
 						isOneToOne: false;
-						referencedRelation: 'chats';
+						referencedRelation: 'users';
 						referencedColumns: ['id'];
 					},
 					{
