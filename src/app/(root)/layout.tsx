@@ -8,7 +8,7 @@ const Layout = ({ children }: Props) => {
 	return (
 		<>
 			<Header />
-			{children}
+			<div className="flex h-[calc(100vh-64px)] w-full">{children}</div>
 		</>
 	);
 };

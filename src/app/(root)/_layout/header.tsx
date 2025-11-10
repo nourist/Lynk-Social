@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 
 import { Button } from '~/components/ui/button';
@@ -27,6 +28,7 @@ import { getCurrentUser } from '~/services/auth';
 
 const Header = () => {
 	const pathname = usePathname();
+	const router = useRouter();
 	const supabase = createClient();
 	const { theme, setTheme, resolvedTheme } = useTheme();
 
@@ -96,7 +98,13 @@ const Header = () => {
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem variant="destructive" onClick={() => supabase.auth.signOut()}>
+						<DropdownMenuItem
+							variant="destructive"
+							onClick={() => {
+								supabase.auth.signOut();
+								router.refresh();
+							}}
+						>
 							<LogOut />
 							Logout
 						</DropdownMenuItem>

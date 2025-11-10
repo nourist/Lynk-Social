@@ -8,6 +8,7 @@ const Home = () => {
 	return (
 		<>
 			<button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>Toggle Theme</button>
+			<div className="h-[200vh] w-full"></div>
 		</>
 	);
 };
