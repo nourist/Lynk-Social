@@ -1,10 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import { getShortName, stringToBrightColor } from '~/lib/utils';
 import { cn } from '~/lib/utils';
-import { Tables } from '~/types/database.type';
 
 interface Props {
-	user: Tables<'users'>;
+	user: { avatar: string | null; name: string };
 	className?: string;
 }
 

@@ -320,7 +320,26 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			[_ in never]: never;
+			get_popular_users:
+				| {
+						Args: { limit_n: number; offset_n: number };
+						Returns: {
+							avatar: string;
+							bio: string;
+							email: string;
+							follower_count: number;
+							name: string;
+							total_users: number;
+							user_id: string;
+						}[];
+				  }
+				| {
+						Args: { limit_n: number };
+						Returns: {
+							follower_count: number;
+							user_id: string;
+						}[];
+				  };
 		};
 		Enums: {
 			message_type: 'text' | 'image' | 'video';

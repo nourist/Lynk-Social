@@ -12,7 +12,7 @@ const Sidebar = () => {
 	const navItems = [
 		{ name: 'Home', href: '/', icon: House },
 		{ name: 'Explore', href: '/explore', icon: Search },
-		{ name: 'People', href: '/people', icon: UsersRound },
+		{ name: 'People', href: '/users', icon: UsersRound },
 	];
 
 	return (
@@ -36,11 +36,7 @@ const Sidebar = () => {
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<Link href={item.href} aria-label={item.name} className={buttonVariants({ variant: 'ghost', size: 'icon' })}>
-											<Button size="icon" variant="secondary" asChild className="size-11 rounded-full">
-												<NavLink href={item.href}>
-													<item.icon className="size-6" />
-												</NavLink>
-											</Button>
+											<item.icon className="size-6" />
 										</Link>
 									</TooltipTrigger>
 									<TooltipContent>

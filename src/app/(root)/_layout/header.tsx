@@ -100,8 +100,8 @@ const Header = () => {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							variant="destructive"
-							onClick={() => {
-								supabase.auth.signOut();
+							onClick={async () => {
+								await supabase.auth.signOut();
 								router.refresh();
 							}}
 						>
