@@ -58,7 +58,7 @@ export const getUsers = async ({ limit = 20, offset = 0, search = '' } = {}) => 
 
 	const { data, error, count } = await supabase
 		.from('users')
-		.select()
+		.select('*', { count: 'exact' })
 		.like('name', `%${search}%`)
 		.order('created_at', { ascending: false })
 		.range(offset, offset + limit - 1);
