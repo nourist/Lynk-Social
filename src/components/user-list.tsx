@@ -1,14 +1,36 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import UserCard from './user-card';
 import InfiniteScroll from '~/components/infinity-scroll';
+import { Card, CardContent } from '~/components/ui/card';
+import UserAvatar from '~/components/user-avatar';
 import { getUsers } from '~/services/user';
 
 interface Props {
 	fetcher: ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getUsers>;
 }
+
+interface UserCardProps {
+	user: { id: string; name: string; avatar: string | null; bio: string };
+}
+
+const UserCard = ({ user }: UserCardProps) => {
+	return (
+		<Card>
+			<CardContent>
+				<Link className="flex items-center justify-center gap-2" href={`/users/${user.id}`}>
+					<UserAvatar className="size-12" user={user} />
+					<div className="max-w-65 min-w-55 flex-1 space-y-1">
+						<div className="font-bold">{user.name}</div>
+						<div className="text-muted-foreground truncate overflow-hidden text-sm">{user.bio}</div>
+					</div>
+				</Link>
+			</CardContent>
+		</Card>
+	);
+};
 
 const UserList = ({ fetcher }: Props) => {
 	const [offset, setOffset] = useState(0);

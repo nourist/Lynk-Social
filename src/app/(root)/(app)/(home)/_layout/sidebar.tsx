@@ -28,13 +28,13 @@ const Sidebar = async () => {
 		},
 		{
 			title: 'Popular',
-			data: [...popular.data, ...users.data.slice(0, 5 - popular.data.length)],
+			data: [...popular.data, ...users.data.filter((u) => !popular.data.some((v) => u.id == v.id)).slice(0, 5 - popular.data.length)],
 			link: '/users',
 		},
 	];
 
 	return (
-		<div className="absolute top-6 right-6 max-lg:hidden">
+		<div className="absolute top-6 right-6 space-y-6 max-lg:hidden">
 			{cards
 				.filter((item) => item.data.length != 0)
 				.map((item) => (

@@ -1,4 +1,4 @@
-import UserList from './_components/user-list';
+import UserList from '../../../../components/user-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { getCurrentUser } from '~/services/auth';
 import { getFollowersById, getFollowingsById, getUsers } from '~/services/user';

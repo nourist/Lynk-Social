@@ -65,3 +65,22 @@ export const getUsers = async ({ limit = 20, offset = 0, search = '' } = {}) => 
 	if (error) throw error;
 	return { data, count };
 };
+
+export const isUserFollowed = async (followerId: string, followingId: string) => {
+	const supabase = await createClient();
+	const { data, error } = await supabase.from('user_follows').select().eq('follower_id', followerId).eq('following_id', followingId).maybeSingle();
+	if (error) throw error;
+	return !!data;
+};
+
+export const followUser = async (followerId: string, followingId: string) => {
+	const supabase = await createClient();
+	const { error } = await supabase.from('user_follows').insert({ follower_id: followerId, following_id: followingId });
+	if (error) throw error;
+};
+
+export const unfollowUser = async (followerId: string, followingId: string) => {
+	const supabase = await createClient();
+	const { error } = await supabase.from('user_follows').delete().eq('follower_id', followerId).eq('following_id', followingId);
+	if (error) throw error;
+};
