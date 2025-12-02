@@ -1,8 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { ImagePlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import * as z from 'zod';
 
@@ -14,11 +16,10 @@ import { Input } from '~/components/ui/input';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Textarea } from '~/components/ui/textarea';
 import UserAvatar from '~/components/user-avatar';
+import { useImageAndVideoUpload } from '~/hooks/use-image-and-video-upload';
+import { createClient } from '~/lib/supabase/client';
 import { getCurrentUser } from '~/services/auth';
 import { createPost } from '~/services/blog';
-import { createClient } from '~/lib/supabase/client';
-import { ImagePlus } from 'lucide-react';
-import { useImageAndVideoUpload } from '~/hooks/use-image-and-video-upload';
 
 const formSchema = z.object({
 	title: z.string().min(1, 'Title must be at least 1 characters.').max(100, 'Title must be at most 100 characters.'),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 });
 
 const CreatePost = () => {
+	const router = useRouter();
 	const { data: user, error } = useSWR('current-user', getCurrentUser);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -58,7 +60,6 @@ const CreatePost = () => {
 		throw error;
 	}
 
-
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		if (!user) {
 			setUploadError('User information not found.');
@@ -84,7 +85,7 @@ const CreatePost = () => {
 				const fileName = `${user.id}-${Date.now()}.${extension}`;
 				const filePath = `${user.id}/${fileName}`;
 
-				const { data: uploadData, error: uploadErrorResult } = await supabase.storage.from(bucket).upload(filePath, file);
+				const { data: uploadData, error: uploadErrorResult } = await supabase.storage.from(bucket).upload(filePath, file, { contentType: file.type });
 
 				if (uploadErrorResult) {
 					throw uploadErrorResult;
@@ -117,6 +118,8 @@ const CreatePost = () => {
 				setUploadError('An error occurred while creating the post.');
 			}
 		}
+
+		window.location.reload();
 	}
 
 	return (
@@ -165,25 +168,20 @@ const CreatePost = () => {
 									onDragLeave={handleDragLeave}
 									onDrop={handleDrop}
 								>
-									<div className="mb-3 flex size-12 items-center justify-center rounded-full bg-background/80">
-										<ImagePlus className="size-6 text-muted-foreground" />
+									<div className="bg-background/80 mb-3 flex size-12 items-center justify-center rounded-full">
+										<ImagePlus className="text-muted-foreground size-6" />
 									</div>
 									<p className="text-sm font-medium">Click to select</p>
-									<p className="text-xs text-muted-foreground">or drag and drop file here</p>
+									<p className="text-muted-foreground text-xs">or drag and drop file here</p>
 									{file && (
-										<p className="mt-2 truncate text-xs text-muted-foreground">
-											Selected file: <span className="font-medium">{file.name}</span>
-										</p>
+										<div className="text-muted-foreground mt-2 w-full text-xs">
+											Selected file:{' '}
+											<span className="inline-block max-w-full overflow-hidden align-bottom font-medium text-ellipsis whitespace-nowrap">{file.name}</span>
+										</div>
 									)}
 								</div>
-								<input
-									ref={fileInputRef}
-									type="file"
-									accept="image/*,video/*"
-									className="hidden"
-									onChange={handleInputChange}
-								/>
-								{uploadError && <p className="text-sm text-destructive mt-1">{uploadError}</p>}
+								<input ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleInputChange} />
+								{uploadError && <p className="text-destructive mt-1 text-sm">{uploadError}</p>}
 							</div>
 						</Field>
 						<DialogFooter>

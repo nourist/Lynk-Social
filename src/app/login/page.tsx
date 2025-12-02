@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useCallback } from 'react';
 
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
@@ -8,6 +9,16 @@ import { createClient } from '~/lib/supabase/client';
 
 const Login = () => {
 	const supabase = createClient();
+
+	const handleLogin = useCallback(() => {
+		const origin = typeof window !== 'undefined' ? window.location.origin : '';
+		supabase.auth.signInWithOAuth({
+			provider: 'google',
+			options: {
+				redirectTo: `${origin}/`,
+			},
+		});
+	}, [supabase]);
 
 	return (
 		<div className="absolute top-1/6 left-1/2 flex w-sm -translate-x-1/2 flex-col gap-4">
@@ -21,13 +32,7 @@ const Login = () => {
 					<CardDescription>Sign in with your google account</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Button
-						variant="outline"
-						className="w-full"
-						onClick={() => {
-							supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: '/' } });
-						}}
-					>
+					<Button variant="outline" className="w-full" onClick={handleLogin}>
 						<Image src="/google-logo.svg" alt="google logo" width={24} height={24} />
 						Continue with google
 					</Button>

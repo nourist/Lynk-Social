@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
 
 type FileType = 'image' | 'video';
 
@@ -109,5 +109,3 @@ export const useImageAndVideoUpload = (options: UseImageAndVideoUploadOptions = 
 		handleDrop,
 	};
 };
-
-

@@ -170,14 +170,17 @@ export type Database = {
 			};
 			user_follows: {
 				Row: {
+					created_at: string;
 					follower_id: string;
 					following_id: string;
 				};
 				Insert: {
+					created_at?: string;
 					follower_id?: string;
 					following_id: string;
 				};
 				Update: {
+					created_at?: string;
 					follower_id?: string;
 					following_id?: string;
 				};
@@ -320,26 +323,30 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			get_popular_users:
-				| {
-						Args: { limit_n: number; offset_n: number };
-						Returns: {
-							avatar: string;
-							bio: string;
-							email: string;
-							follower_count: number;
-							name: string;
-							total_users: number;
-							user_id: string;
-						}[];
-				  }
-				| {
-						Args: { limit_n: number };
-						Returns: {
-							follower_count: number;
-							user_id: string;
-						}[];
-				  };
+			get_home_posts: {
+				Args: { p_limit: number; p_offset: number; p_user_id: string };
+				Returns: {
+					author: Json;
+					content: string;
+					created_at: string;
+					id: string;
+					image: string;
+					title: string;
+					video: string;
+				}[];
+			};
+			get_popular_users: {
+				Args: { limit_n: number; offset_n: number };
+				Returns: {
+					avatar: string;
+					bio: string;
+					email: string;
+					follower_count: number;
+					name: string;
+					total_users: number;
+					user_id: string;
+				}[];
+			};
 		};
 		Enums: {
 			message_type: 'text' | 'image' | 'video';
