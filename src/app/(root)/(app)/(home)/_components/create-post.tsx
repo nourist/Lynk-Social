@@ -19,7 +19,7 @@ import UserAvatar from '~/components/user-avatar';
 import { useImageAndVideoUpload } from '~/hooks/use-image-and-video-upload';
 import { createClient } from '~/lib/supabase/client';
 import { getCurrentUser } from '~/services/auth';
-import { createPost } from '~/services/blog';
+import { createPost } from '~/services/post';
 
 const formSchema = z.object({
 	title: z.string().min(1, 'Title must be at least 1 characters.').max(100, 'Title must be at most 100 characters.'),

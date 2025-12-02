@@ -10,7 +10,7 @@ import InfiniteScroll from '~/components/infinity-scroll';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import UserAvatar from '~/components/user-avatar';
-import { PostItem, PostListResponse, type getExplorePosts, getHomePosts, isPostLiked, toggleLikePost } from '~/services/blog';
+import { PostItem, PostListResponse, type getExplorePosts, getHomePosts, toggleLikePost } from '~/services/post';
 
 interface Props {
 	fetcher: ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getHomePosts | typeof getExplorePosts>;
@@ -22,17 +22,9 @@ interface PostCardProps {
 
 const PostCard = ({ post }: PostCardProps) => {
 	const router = useRouter();
-	const [isLiked, setIsLiked] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLiked, setIsLiked] = useState(post.isLiked);
 
-	useEffect(() => {
-		isPostLiked(post.id)
-			.then(setIsLiked)
-			.catch(() => {
-				// Silently fail if user is not authenticated
-			})
-			.finally(() => setIsLoading(false));
-	}, [post.id]);
+	console.log(post.isLiked)
 
 	const handleLike = async () => {
 		try {
@@ -87,7 +79,7 @@ const PostCard = ({ post }: PostCardProps) => {
 				)}
 
 				<div className="flex items-center gap-2 border-t pt-4">
-					<Button variant="ghost" size="sm" onClick={handleLike} disabled={isLoading} className={isLiked ? 'text-red-500 hover:text-red-600' : ''}>
+					<Button variant="ghost" size="sm" onClick={handleLike} className={isLiked ? 'text-red-500 hover:text-red-600' : ''}>
 						<Heart className={isLiked ? 'fill-current' : ''} />
 						Like
 					</Button>

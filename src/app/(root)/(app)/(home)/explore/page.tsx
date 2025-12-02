@@ -1,5 +1,5 @@
 import PostList from '~/components/post-list';
-import { getExplorePosts } from '~/services/blog';
+import { getExplorePosts } from '~/services/post';
 
 const Explore = () => {
 	return (

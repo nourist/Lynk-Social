@@ -45,6 +45,7 @@ export type PostAuthor = Pick<Tables<'users'>, 'id' | 'name' | 'avatar' | 'bio'>
 
 export type PostItem = Pick<Tables<'posts'>, 'id' | 'title' | 'content' | 'image' | 'video' | 'created_at'> & {
 	author: PostAuthor;
+	isLiked: boolean
 };
 
 export type PostListResponse = {
@@ -79,6 +80,7 @@ export const getHomePosts = async ({ limit = 20, offset = 0 }: PaginationParams 
 			data?.map((post) => ({
 				...post,
 				author: post.author as PostAuthor,
+				isLiked: post.is_liked,
 			})) ?? [],
 		count: data?.length ?? 0,
 	};
@@ -87,21 +89,28 @@ export const getHomePosts = async ({ limit = 20, offset = 0 }: PaginationParams 
 export const getExplorePosts = async ({ limit = 20, offset = 0 }: PaginationParams = {}): Promise<PostListResponse> => {
 	const supabase = await createClient();
 
-	const { data, error, count } = await supabase
-		.from('posts')
-		.select('id, title, content, image, video, created_at, author:users!posts_author_id_fkey(id, name, avatar, bio)', {
-			count: 'exact',
-		})
-		.order('created_at', { ascending: false })
-		.range(offset, offset + limit - 1);
+	const {
+		data: { user },
+		error: authError,
+	} = await supabase.auth.getUser();
+	if (authError || !user) throw new Error('Unauthorized');
 
-	if (error) {
-		throw error;
-	}
+	const { data, error } = await supabase.rpc('get_explore_posts', {
+		p_user_id: user.id,
+		p_limit: limit,
+		p_offset: offset,
+	});
+
+	if (error) throw error;
 
 	return {
-		data,
-		count,
+		data:
+			data?.map((post) => ({
+				...post,
+				author: post.author as PostAuthor,
+				isLiked: post.is_liked,
+			})) ?? [],
+		count: data?.length ?? 0,
 	};
 };
 
@@ -145,27 +154,6 @@ export const toggleLikePost = async (postId: string) => {
 		}
 		return { liked: true };
 	}
-};
-
-export const isPostLiked = async (postId: string) => {
-	const supabase = await createClient();
-
-	const {
-		data: { user },
-		error: authError,
-	} = await supabase.auth.getUser();
-
-	if (authError || !user) {
-		return false;
-	}
-
-	const { data, error } = await supabase.from('user_like_posts').select().eq('post_id', postId).eq('user_id', user.id).maybeSingle();
-
-	if (error) {
-		throw error;
-	}
-
-	return !!data;
 };
 
 export const getPostLikesCount = async (postId: string) => {
