@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ImagePlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import useSWR from 'swr';
@@ -20,6 +19,7 @@ import { useImageAndVideoUpload } from '~/hooks/use-image-and-video-upload';
 import { createClient } from '~/lib/supabase/client';
 import { getCurrentUser } from '~/services/auth';
 import { createPost } from '~/services/post';
+import { mutate } from 'swr';
 
 const formSchema = z.object({
 	title: z.string().min(1, 'Title must be at least 1 characters.').max(100, 'Title must be at most 100 characters.'),
@@ -27,7 +27,6 @@ const formSchema = z.object({
 });
 
 const CreatePost = () => {
-	const router = useRouter();
 	const { data: user, error } = useSWR('current-user', getCurrentUser);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -119,7 +118,7 @@ const CreatePost = () => {
 			}
 		}
 
-		window.location.reload();
+		mutate('home-posts-0');
 	}
 
 	return (
