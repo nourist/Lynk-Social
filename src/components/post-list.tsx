@@ -102,7 +102,7 @@ const PostCard = ({ post }: PostCardProps) => {
 	);
 };
 
-const PostSkeleton = () => (
+export const PostSkeleton = () => (
 	<Card className="animate-pulse">
 		<CardContent className="space-y-3">
 			<div className="flex items-center gap-3">

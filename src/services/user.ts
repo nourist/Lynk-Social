@@ -84,3 +84,34 @@ export const unfollowUser = async (followerId: string, followingId: string) => {
 	const { error } = await supabase.from('user_follows').delete().eq('follower_id', followerId).eq('following_id', followingId);
 	if (error) throw error;
 };
+
+export type UserStats = {
+	postsCount: number;
+	followersCount: number;
+	followingsCount: number;
+};
+
+export const getUserStatById = async (userId: string): Promise<UserStats> => {
+	const supabase = await createClient();
+
+	// Get posts count
+	const { count: postsCount, error: postsError } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('author_id', userId);
+
+	if (postsError) throw postsError;
+
+	// Get followers count
+	const { count: followersCount, error: followersError } = await supabase.from('user_follows').select('*', { count: 'exact', head: true }).eq('following_id', userId);
+
+	if (followersError) throw followersError;
+
+	// Get followings count
+	const { count: followingsCount, error: followingsError } = await supabase.from('user_follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId);
+
+	if (followingsError) throw followingsError;
+
+	return {
+		postsCount: postsCount ?? 0,
+		followersCount: followersCount ?? 0,
+		followingsCount: followingsCount ?? 0,
+	};
+};

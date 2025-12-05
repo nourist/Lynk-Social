@@ -3,7 +3,7 @@ import UserContent from './_components/user-content';
 import { Card } from '~/components/ui/card';
 import UserAvatar from '~/components/user-avatar';
 import { getCurrentUser } from '~/services/auth';
-import { getUserById, isUserFollowed } from '~/services/user';
+import { getUserById, getUserStatById, isUserFollowed } from '~/services/user';
 
 interface Props {
 	params: Promise<{ id: string }>;
@@ -13,6 +13,7 @@ const UserProfile = async ({ params }: Props) => {
 	const user = await getUserById((await params).id);
 	const currentUser = await getCurrentUser();
 	const isFollowed = await isUserFollowed(currentUser.id, user.id);
+	const stats = await getUserStatById(user.id);
 
 	return (
 		<div className="space-y-6 xl:mx-8">
@@ -31,7 +32,7 @@ const UserProfile = async ({ params }: Props) => {
 					<ActionButton userId={user.id} currentUserId={currentUser.id} isFollowed={isFollowed} />
 				</div>
 			</Card>
-			<UserContent userId={user.id} />
+			<UserContent userId={user.id} stats={stats} />
 		</div>
 	);
 };
