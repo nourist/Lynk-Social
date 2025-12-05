@@ -107,6 +107,7 @@ const CreatePost = () => {
 				videoUrl,
 			});
 
+			mutate('home-posts-0');
 			form.reset();
 			reset();
 			setOpen(false);
@@ -117,8 +118,6 @@ const CreatePost = () => {
 				setUploadError('An error occurred while creating the post.');
 			}
 		}
-
-		mutate('home-posts-0');
 	}
 
 	return (
