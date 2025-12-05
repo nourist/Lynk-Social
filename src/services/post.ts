@@ -45,7 +45,7 @@ export type PostAuthor = Pick<Tables<'users'>, 'id' | 'name' | 'avatar' | 'bio'>
 
 export type PostItem = Pick<Tables<'posts'>, 'id' | 'title' | 'content' | 'image' | 'video' | 'created_at'> & {
 	author: PostAuthor;
-	isLiked: boolean
+	isLiked: boolean;
 };
 
 export type PostListResponse = {
@@ -82,7 +82,7 @@ export const getHomePosts = async ({ limit = 20, offset = 0 }: PaginationParams 
 				author: post.author as PostAuthor,
 				isLiked: post.is_liked,
 			})) ?? [],
-		count: data?.length ?? 0,
+		count: data?.[0].total_count ?? 0,
 	};
 };
 
@@ -110,7 +110,7 @@ export const getExplorePosts = async ({ limit = 20, offset = 0 }: PaginationPara
 				author: post.author as PostAuthor,
 				isLiked: post.is_liked,
 			})) ?? [],
-		count: data?.length ?? 0,
+		count: data?.[0].total_count ?? 0,
 	};
 };
 

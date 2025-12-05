@@ -25,10 +25,11 @@ const Users = async ({ searchParams }: Props) => {
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="all">
-					<UserList fetcher={getUsers} />
+					<UserList type="all" fetcher={getUsers} />
 				</TabsContent>
 				<TabsContent value="followers">
 					<UserList
+						type="followers"
 						fetcher={async (args) => {
 							'use server';
 							return getFollowersById(user.id || '', args);
@@ -37,6 +38,7 @@ const Users = async ({ searchParams }: Props) => {
 				</TabsContent>
 				<TabsContent value="followings">
 					<UserList
+						type="followings"
 						fetcher={async (args) => {
 							'use server';
 							return getFollowingsById(user.id || '', args);

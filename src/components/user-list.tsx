@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import useSWR from 'swr';
 
 import InfiniteScroll from '~/components/infinity-scroll';
 import { Card, CardContent } from '~/components/ui/card';
@@ -10,6 +11,15 @@ import { getUsers } from '~/services/user';
 
 interface Props {
 	fetcher: ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getUsers>;
+	type: string;
+}
+
+type UserFetcher = ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getUsers>;
+
+interface UserPageProps {
+	fetcher: UserFetcher;
+	offset: number;
+	type: string;
 }
 
 interface UserCardProps {
@@ -32,39 +42,60 @@ const UserCard = ({ user }: UserCardProps) => {
 	);
 };
 
-const UserList = ({ fetcher }: Props) => {
-	const [offset, setOffset] = useState(0);
-	const [data, setData] = useState<Awaited<ReturnType<typeof getUsers>>>({
-		count: 1,
-		data: [],
-	});
-	const [isLoading, setIsLoading] = useState(false);
+const UserSkeleton = () => (
+	<Card className="w-fit animate-pulse">
+		<CardContent className="flex items-center justify-center gap-2">
+			<div className="bg-muted size-12 rounded-full" />
+			<div className="max-w-65 min-w-55 space-y-1">
+				<div className="bg-muted h-4 w-3/5 rounded" />
+				<div className="bg-muted h-3 w-full rounded" />
+			</div>
+		</CardContent>
+	</Card>
+);
 
-	useEffect(() => {
-		console.log(offset);
-		if (isLoading) return;
-		setIsLoading(true);
-		fetcher({ limit: 20, offset })
-			.then((data) => {
-				setData((prev) => ({
-					count: data.count,
-					data: [...prev.data, ...data.data],
-				}));
-			})
-			.finally(() => setIsLoading(false));
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [offset]);
+const UserPage = ({ fetcher, offset, type }: UserPageProps) => {
+	const { data, isLoading, error } = useSWR(`${type}-users-${offset}`, () => fetcher({ limit: 20, offset }));
+
+	if (error) {
+		throw error;
+	}
+
+	if (isLoading) {
+		return <UserSkeleton />;
+	}
+
+	return (
+		<>
+			{data?.data.map((user) => (
+				<UserCard key={user.id} user={user} />
+			))}
+		</>
+	);
+};
+
+const UserList = ({ fetcher, type }: Props) => {
+	const [cnt, setCnt] = useState(0);
+	const { data, isLoading, error } = useSWR(`${type}-users-0`, () => fetcher({ limit: 20, offset: 0 }));
+
+	if (error) {
+		throw error;
+	}
+
+	if (isLoading) {
+		return <UserSkeleton />;
+	}
 
 	return (
 		<InfiniteScroll
-			hasMore={(data.count ?? 0) > offset + 20}
+			hasMore={(data?.count ?? 0) > cnt * 20}
 			loadMore={() => {
-				setOffset((prev: number) => prev + 20);
+				setCnt((prev: number) => prev + 1);
 			}}
 		>
 			<div className="flex flex-wrap gap-6">
-				{data.data.map((user) => (
-					<UserCard key={user.id} user={user} />
+				{Array.from({ length: cnt }, (_, i) => (
+					<UserPage fetcher={fetcher} offset={i * 20} type={type} key={i} />
 				))}
 			</div>
 		</InfiniteScroll>

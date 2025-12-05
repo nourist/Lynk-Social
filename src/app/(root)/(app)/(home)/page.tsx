@@ -4,12 +4,12 @@ import { getHomePosts } from '~/services/post';
 
 const Home = () => {
 	return (
-		<>
+		<div className="xl:mx-8">
 			<CreatePost />
-			<div className="mt-6">
-				<PostList fetcher={getHomePosts} />
+			<div className="mt-6 space-y-6">
+				<PostList type="home" fetcher={getHomePosts} />
 			</div>
-		</>
+		</div>
 	);
 };
 

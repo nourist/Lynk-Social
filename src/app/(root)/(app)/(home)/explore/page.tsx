@@ -3,8 +3,8 @@ import { getExplorePosts } from '~/services/post';
 
 const Explore = () => {
 	return (
-		<div className="space-y-4">
-			<PostList fetcher={getExplorePosts} />
+		<div className="space-y-6 xl:mx-8">
+			<PostList type="explore" fetcher={getExplorePosts} />
 		</div>
 	);
 };

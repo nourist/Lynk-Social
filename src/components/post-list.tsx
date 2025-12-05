@@ -3,35 +3,44 @@
 import { Heart, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 
 import InfiniteScroll from '~/components/infinity-scroll';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import UserAvatar from '~/components/user-avatar';
-import { PostItem, PostListResponse, type getExplorePosts, getHomePosts, toggleLikePost } from '~/services/post';
+import { PostItem, type getExplorePosts, getHomePosts, toggleLikePost } from '~/services/post';
+
+type PostFetcher = ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getHomePosts | typeof getExplorePosts>;
 
 interface Props {
-	fetcher: ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getHomePosts | typeof getExplorePosts>;
+	fetcher: PostFetcher;
+	type: string;
 }
 
 interface PostCardProps {
 	post: PostItem;
 }
 
+interface PostPageProps {
+	fetcher: PostFetcher;
+	offset: number;
+	type: string;
+}
+
 const PostCard = ({ post }: PostCardProps) => {
 	const router = useRouter();
 	const [isLiked, setIsLiked] = useState(post.isLiked);
 
-	console.log(post.isLiked)
-
 	const handleLike = async () => {
 		try {
-			const result = await toggleLikePost(post.id);
-			setIsLiked(result.liked);
+			setIsLiked((prev) => !prev);
+			await toggleLikePost(post.id);
 		} catch {
-			toast.error('Không thể thực hiện thao tác like');
+			toast.error('Error while liking the post');
+			setIsLiked((prev) => !prev);
 		}
 	};
 
@@ -93,40 +102,76 @@ const PostCard = ({ post }: PostCardProps) => {
 	);
 };
 
-const PostList = ({ fetcher }: Props) => {
-	const [offset, setOffset] = useState(0);
-	const [data, setData] = useState<PostListResponse>({
-		count: 0,
-		data: [],
-	});
-	const [isLoading, setIsLoading] = useState(false);
+const PostSkeleton = () => (
+	<Card className="animate-pulse">
+		<CardContent className="space-y-3">
+			<div className="flex items-center gap-3">
+				<div className="bg-muted size-10 rounded-full" />
+				<div className="flex-1 space-y-1">
+					<div className="bg-muted h-4 w-24 rounded" />
+					<div className="bg-muted h-3 w-40 rounded" />
+				</div>
+			</div>
 
-	useEffect(() => {
-		if (isLoading) return;
-		setIsLoading(true);
-		fetcher({ limit: 20, offset })
-			.then((res) => {
-				setData((prev) => ({
-					count: res.count,
-					data: [...prev.data, ...res.data],
-				}));
-			})
-			.finally(() => setIsLoading(false));
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [offset]);
+			<div className="space-y-1">
+				<div className="bg-muted h-5 w-3/5 rounded" />
+				<div className="bg-muted h-4 w-full rounded" />
+				<div className="bg-muted h-4 w-4/5 rounded" />
+			</div>
+
+			<div className="bg-muted h-60 w-full rounded-md" />
+
+			<div className="flex items-center gap-2 border-t pt-4">
+				<div className="bg-muted h-8 w-20 rounded" />
+				<div className="bg-muted h-8 w-28 rounded" />
+			</div>
+		</CardContent>
+	</Card>
+);
+
+const PostPage = ({ fetcher, offset, type }: PostPageProps) => {
+	const { data, isLoading, error } = useSWR(`${type}-posts-${offset}`, () => fetcher({ limit: 20, offset }));
+
+	if (error) {
+		throw error;
+	}
+
+	if (isLoading) {
+		return <PostSkeleton />;
+	}
+
+	return (
+		<>
+			{data?.data.map((post) => (
+				<PostCard key={post.id} post={post} />
+			))}
+		</>
+	);
+};
+
+const PostList = ({ fetcher, type }: Props) => {
+	const [cnt, setCnt] = useState(0);
+
+	const { data, isLoading, error } = useSWR(`${type}-posts-0`, () => fetcher({ limit: 20, offset: 0 }));
+
+	if (error) {
+		throw error;
+	}
+
+	if (isLoading) {
+		return <PostSkeleton />;
+	}
 
 	return (
 		<InfiniteScroll
-			hasMore={(data.count ?? 0) > offset + 20}
+			hasMore={(data?.count ?? 0) > cnt * 20}
 			loadMore={() => {
-				setOffset((prev: number) => prev + 20);
+				setCnt((prev: number) => prev + 1);
 			}}
 		>
-			<div className="flex flex-col gap-6">
-				{data.data.map((post) => (
-					<PostCard key={post.id} post={post} />
-				))}
-			</div>
+			{Array.from({ length: cnt }, (_, i) => (
+				<PostPage type={type} fetcher={fetcher} offset={i * 20} key={i} />
+			))}
 		</InfiniteScroll>
 	);
 };
