@@ -15,7 +15,7 @@ const UserProfile = async ({ params }: Props) => {
 	const isFollowed = await isUserFollowed(currentUser.id, user.id);
 
 	return (
-		<>
+		<div className="space-y-6 xl:mx-8">
 			<Card className="relative overflow-hidden pt-0">
 				<div className="relative h-42 overflow-hidden">
 					{/* eslint-disable-next-line @next/next/no-img-element */}
@@ -32,7 +32,7 @@ const UserProfile = async ({ params }: Props) => {
 				</div>
 			</Card>
 			<UserContent userId={user.id} />
-		</>
+		</div>
 	);
 };
 

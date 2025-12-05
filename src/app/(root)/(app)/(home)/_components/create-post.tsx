@@ -5,6 +5,7 @@ import { ImagePlus } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import useSWR from 'swr';
+import { mutate } from 'swr';
 import * as z from 'zod';
 
 import { Button } from '~/components/ui/button';
@@ -19,7 +20,6 @@ import { useImageAndVideoUpload } from '~/hooks/use-image-and-video-upload';
 import { createClient } from '~/lib/supabase/client';
 import { getCurrentUser } from '~/services/auth';
 import { createPost } from '~/services/post';
-import { mutate } from 'swr';
 
 const formSchema = z.object({
 	title: z.string().min(1, 'Title must be at least 1 characters.').max(100, 'Title must be at most 100 characters.'),

@@ -186,3 +186,45 @@ export const getPostById = async (postId: string): Promise<PostItem | null> => {
 
 	return data as PostItem;
 };
+
+export const getPostsByUserId = async (userId: string, { limit = 20, offset = 0 }: PaginationParams = {}): Promise<PostListResponse> => {
+	const supabase = await createClient();
+
+	const {
+		data: { user },
+		error: authError,
+	} = await supabase.auth.getUser();
+	if (authError || !user) throw new Error('Unauthorized');
+
+	// Get posts by user ID with pagination
+	const {
+		data: posts,
+		error: postsError,
+		count,
+	} = await supabase
+		.from('posts')
+		.select('id, title, content, image, video, created_at, author:users!posts_author_id_fkey(id, name, avatar, bio)', {
+			count: 'exact',
+		})
+		.eq('author_id', userId)
+		.order('created_at', { ascending: false })
+		.range(offset, offset + limit - 1);
+
+	if (postsError) throw postsError;
+
+	// Get liked posts for current user
+	const postIds = posts?.map((post) => post.id) ?? [];
+	const { data: likedPosts } = await supabase.from('user_like_posts').select('post_id').eq('user_id', user.id).in('post_id', postIds);
+
+	const likedPostIds = new Set(likedPosts?.map((lp) => lp.post_id) ?? []);
+
+	return {
+		data:
+			posts?.map((post) => ({
+				...post,
+				author: post.author as PostAuthor,
+				isLiked: likedPostIds.has(post.id),
+			})) ?? [],
+		count: count ?? 0,
+	};
+};

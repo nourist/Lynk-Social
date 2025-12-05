@@ -2,8 +2,10 @@
 
 import { useSearchParams } from 'next/navigation';
 
+import PostList from '~/components/post-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import UserList from '~/components/user-list';
+import { getPostsByUserId } from '~/services/post';
 import { getFollowersById, getFollowingsById } from '~/services/user';
 
 interface Props {
@@ -27,8 +29,17 @@ const UserContent = ({ userId }: Props) => {
 						Followings
 					</TabsTrigger>
 				</TabsList>
+				<TabsContent className="space-y-6" value="posts">
+					<PostList
+						type={`posts-${userId}`}
+						fetcher={async (args) => {
+							return getPostsByUserId(userId || '', args);
+						}}
+					/>
+				</TabsContent>
 				<TabsContent value="followers">
 					<UserList
+						type={`followers-${userId}`}
 						fetcher={async (args) => {
 							return getFollowersById(userId || '', args);
 						}}
@@ -36,6 +47,7 @@ const UserContent = ({ userId }: Props) => {
 				</TabsContent>
 				<TabsContent value="followings">
 					<UserList
+						type={`followings-${userId}`}
 						fetcher={async (args) => {
 							return getFollowingsById(userId || '', args);
 						}}
