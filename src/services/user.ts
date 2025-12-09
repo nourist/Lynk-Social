@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '~/lib/supabase/server';
+import { TablesUpdate } from '~/types/database.type';
 
 export const getUserById = async (id: string) => {
 	const supabase = await createClient();
@@ -114,4 +115,41 @@ export const getUserStatById = async (userId: string): Promise<UserStats> => {
 		followersCount: followersCount ?? 0,
 		followingsCount: followingsCount ?? 0,
 	};
+};
+
+type UpdateUserProfileInput = Pick<TablesUpdate<'users'>, 'name' | 'bio' | 'avatar' | 'thumbnail'>;
+
+export const updateCurrentUserProfile = async (payload: UpdateUserProfileInput) => {
+	const supabase = await createClient();
+
+	const {
+		data: { user },
+		error: authError,
+	} = await supabase.auth.getUser();
+
+	if (authError) {
+		throw authError;
+	}
+
+	if (!user) {
+		throw new Error('Unauthorized');
+	}
+
+	const { data, error } = await supabase
+		.from('users')
+		.update({
+			name: payload.name,
+			bio: payload.bio,
+			avatar: payload.avatar,
+			thumbnail: payload.thumbnail,
+		})
+		.eq('id', user.id)
+		.select()
+		.single();
+
+	if (error) {
+		throw error;
+	}
+
+	return data;
 };

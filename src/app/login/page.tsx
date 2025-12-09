@@ -11,11 +11,10 @@ const Login = () => {
 	const supabase = createClient();
 
 	const handleLogin = useCallback(() => {
-		const origin = typeof window !== 'undefined' ? window.location.origin : '';
 		supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${origin}/`,
+				redirectTo: `/`,
 			},
 		});
 	}, [supabase]);

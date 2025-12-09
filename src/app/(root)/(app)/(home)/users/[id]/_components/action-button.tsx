@@ -2,7 +2,7 @@
 
 import { UserCheck, UserPlus } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { Button } from '~/components/ui/button';
 import { followUser, unfollowUser } from '~/services/user';
@@ -14,17 +14,17 @@ interface Props {
 }
 
 const ActionButton = ({ userId, currentUserId, isFollowed }: Props) => {
-	const router = useRouter();
+	const [followed, setFollowed] = useState(isFollowed);
 
 	return userId == currentUserId ? (
 		<Button variant="secondary" asChild>
 			<Link href="/settings">Edit Profile</Link>
 		</Button>
-	) : isFollowed ? (
+	) : followed ? (
 		<Button
 			onClick={async () => {
+				setFollowed(false);
 				await unfollowUser(currentUserId, userId);
-				router.refresh();
 			}}
 			variant="outline"
 		>
@@ -34,8 +34,8 @@ const ActionButton = ({ userId, currentUserId, isFollowed }: Props) => {
 	) : (
 		<Button
 			onClick={async () => {
+				setFollowed(true);
 				await followUser(currentUserId, userId);
-				router.refresh();
 			}}
 		>
 			<UserPlus />
