@@ -22,6 +22,7 @@ interface Props {
 
 interface PostCardProps {
 	post: PostItem;
+	onCommentClick?: () => void;
 }
 
 interface PostPageProps {
@@ -30,7 +31,7 @@ interface PostPageProps {
 	type: string;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, onCommentClick }: PostCardProps) => {
 	const router = useRouter();
 	const [isLiked, setIsLiked] = useState(post.isLiked);
 
@@ -45,6 +46,11 @@ const PostCard = ({ post }: PostCardProps) => {
 	};
 
 	const handleComment = () => {
+		if (onCommentClick) {
+			onCommentClick();
+			return;
+		}
+
 		router.push(`/posts/${post.id}`);
 	};
 
@@ -177,3 +183,4 @@ const PostList = ({ fetcher, type }: Props) => {
 };
 
 export default PostList;
+export { PostCard };
