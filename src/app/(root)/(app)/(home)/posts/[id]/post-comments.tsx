@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2, Send } from 'lucide-react';
+import Link from 'next/link';
 import { useRef, useState } from 'react';
 import useSWR from 'swr';
 
@@ -85,10 +86,14 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 					) : (
 						comments?.map((item) => (
 							<div key={item.id} className="flex gap-3">
-								<UserAvatar className="size-10" user={item.user} />
+								<Link href={`/users/${item.user.id}`}>
+									<UserAvatar className="size-10" user={item.user} />
+								</Link>
 								<div className="bg-muted/50 flex flex-1 flex-col rounded-md px-3 py-2">
 									<div className="flex items-center gap-2">
-										<span className="text-sm font-semibold">{item.user.name}</span>
+										<Link href={`/users/${item.user.id}`} className="text-sm font-semibold hover:underline">
+											{item.user.name}
+										</Link>
 										<span className="text-muted-foreground text-xs">
 											{new Date(item.created_at).toLocaleString(undefined, {
 												day: '2-digit',
