@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Send } from 'lucide-react';
+import { Heart, Loader2, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import useSWR from 'swr';
@@ -9,7 +9,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Textarea } from '~/components/ui/textarea';
 import UserAvatar from '~/components/user-avatar';
-import { createComment, getCommentsByPostId } from '~/services/comment';
+import { createComment, getCommentsByPostId, toggleLikeComment } from '~/services/comment';
 
 type TextareaRef = React.RefObject<HTMLTextAreaElement | null> | React.MutableRefObject<HTMLTextAreaElement | null>;
 
@@ -23,6 +23,7 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 	const commentRef = textareaRef ?? internalRef;
 	const [comment, setComment] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [likingId, setLikingId] = useState<string | null>(null);
 
 	const { data: comments, isLoading, error, mutate } = useSWR(`post-${postId}-comments`, () => getCommentsByPostId(postId));
 
@@ -57,32 +58,54 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 		}
 	};
 
+	const handleToggleLike = async (commentId: string) => {
+		if (!comments) return;
+
+		const optimistic = comments.map((c) => (c.id === commentId ? { ...c, isLiked: !c.isLiked, likesCount: c.likesCount + (c.isLiked ? -1 : 1) } : c));
+
+		await mutate(optimistic, false);
+
+		setLikingId(commentId);
+		try {
+			await toggleLikeComment(commentId);
+			await mutate();
+		} catch (err) {
+			console.error(err);
+			// fallback revalidation to correct state if error
+			await mutate();
+		} finally {
+			setLikingId(null);
+		}
+	};
+
 	return (
 		<Card>
 			<CardContent className="space-y-4">
 				<div className="border-input focus-within:ring-ring/50 bg-background/40 focus-within:border-ring flex flex-col gap-2 rounded-lg border px-3 pt-2 pb-3 shadow-sm transition focus-within:ring-2">
 					<Textarea
 						ref={commentRef}
-						placeholder="Viết bình luận..."
+						placeholder="Write a comment..."
 						value={comment}
 						onChange={(e) => setComment(e.target.value)}
 						className="min-h-[96px] border-none px-0 shadow-none focus-visible:ring-0"
 					/>
 
 					<div className="flex items-end justify-between gap-3">
-						<span className="text-muted-foreground text-xs">Nhập bình luận của bạn</span>
+						<span className="text-muted-foreground text-xs">Add your comment</span>
 						<Button onClick={handleSubmit} disabled={isSubmitting || !comment.trim()} size="sm">
 							{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-							Gửi
+							Send
 						</Button>
 					</div>
 				</div>
 
+				<div className="text-muted-foreground text-sm">Comments ({comments?.length ?? 0})</div>
+
 				<div className="space-y-3">
 					{isLoading ? (
-						<p className="text-muted-foreground text-sm">Đang tải bình luận...</p>
+						<p className="text-muted-foreground text-sm">Loading comments...</p>
 					) : (comments?.length ?? 0) === 0 ? (
-						<p className="text-muted-foreground text-sm">Chưa có bình luận nào.</p>
+						<p className="text-muted-foreground text-sm">No comments yet.</p>
 					) : (
 						comments?.map((item) => (
 							<div key={item.id} className="flex gap-3">
@@ -105,6 +128,18 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 										</span>
 									</div>
 									<p className="text-foreground text-sm">{item.content}</p>
+									<div className="mt-2">
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => handleToggleLike(item.id)}
+											disabled={likingId === item.id}
+											className={item.isLiked ? 'text-red-500 hover:text-red-600' : ''}
+										>
+											<Heart className={`mr-1 h-4 w-4 ${item.isLiked ? 'fill-current' : ''}`} />
+											<span className="text-xs">{item.likesCount}</span>
+										</Button>
+									</div>
 								</div>
 							</div>
 						))
