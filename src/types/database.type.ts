@@ -351,6 +351,24 @@ export type Database = {
 					video: string;
 				}[];
 			};
+			get_mutual_friends_with_last_message: {
+				Args: { p_user_id: string };
+				Returns: {
+					friend_avatar: string;
+					friend_bio: string;
+					friend_id: string;
+					friend_name: string;
+					friend_thumbnail: string;
+					last_message_content: string;
+					last_message_created_at: string;
+					last_message_id: string;
+					last_message_image: string;
+					last_message_receiver_id: string;
+					last_message_sender_id: string;
+					last_message_type: Database['public']['Enums']['message_type'];
+					last_message_video: string;
+				}[];
+			};
 			get_popular_users: {
 				Args: { limit_n: number; offset_n: number };
 				Returns: {

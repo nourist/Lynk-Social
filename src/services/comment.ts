@@ -1,8 +1,8 @@
 'use server';
 
+import type { PostAuthor } from './post';
 import { createClient } from '~/lib/supabase/server';
 import type { Tables } from '~/types/database.type';
-import type { PostAuthor } from './post';
 
 export type CommentItem = Tables<'comments'> & { user: PostAuthor; isLiked: boolean; likesCount: number };
 
@@ -114,12 +114,7 @@ export const toggleLikeComment = async (commentId: string) => {
 		throw new Error('Unauthorized');
 	}
 
-	const { data: existingLike, error: checkError } = await supabase
-		.from('user_like_comments')
-		.select()
-		.eq('comment_id', commentId)
-		.eq('user_id', user.id)
-		.maybeSingle();
+	const { data: existingLike, error: checkError } = await supabase.from('user_like_comments').select().eq('comment_id', commentId).eq('user_id', user.id).maybeSingle();
 
 	if (checkError) {
 		throw checkError;

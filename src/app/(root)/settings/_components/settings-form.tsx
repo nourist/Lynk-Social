@@ -121,7 +121,7 @@ const SettingsForm = ({ user }: Props) => {
 					render={({ field, fieldState }) => (
 						<Field data-invalid={fieldState.invalid}>
 							<FieldLabel>Name</FieldLabel>
-							<Input placeholder="Enter your name" {...field} aria-invalid={fieldState.invalid} />
+							<Input className="bg-muted" placeholder="Enter your name" {...field} aria-invalid={fieldState.invalid} />
 							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 						</Field>
 					)}
@@ -132,7 +132,7 @@ const SettingsForm = ({ user }: Props) => {
 					render={({ field, fieldState }) => (
 						<Field data-invalid={fieldState.invalid}>
 							<FieldLabel>Bio</FieldLabel>
-							<Textarea className="wrap-break-word" placeholder="Tell people about yourself" {...field} aria-invalid={fieldState.invalid} />
+							<Textarea className="bg-muted wrap-break-word" placeholder="Tell people about yourself" {...field} aria-invalid={fieldState.invalid} />
 
 							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 						</Field>
