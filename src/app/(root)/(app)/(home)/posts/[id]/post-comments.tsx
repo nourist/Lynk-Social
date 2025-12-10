@@ -1,12 +1,13 @@
 'use client';
 
-import { Heart, Loader2, Send } from 'lucide-react';
+import { Heart, Loader2, MessageSquareDashed, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import useSWR from 'swr';
 
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Textarea } from '~/components/ui/textarea';
 import UserAvatar from '~/components/user-avatar';
 import { createComment, getCommentsByPostId, toggleLikeComment } from '~/services/comment';
@@ -87,7 +88,7 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 						placeholder="Write a comment..."
 						value={comment}
 						onChange={(e) => setComment(e.target.value)}
-						className="min-h-[96px] border-none px-0 shadow-none focus-visible:ring-0"
+						className="min-h-24 border-none px-0 shadow-none focus-visible:ring-0"
 					/>
 
 					<div className="flex items-end justify-between gap-3">
@@ -105,7 +106,15 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 					{isLoading ? (
 						<p className="text-muted-foreground text-sm">Loading comments...</p>
 					) : (comments?.length ?? 0) === 0 ? (
-						<p className="text-muted-foreground text-sm">No comments yet.</p>
+						<Empty className="py-8">
+							<EmptyMedia>
+								<MessageSquareDashed className="text-muted-foreground size-10" />
+							</EmptyMedia>
+							<EmptyHeader>
+								<EmptyTitle>No comments yet</EmptyTitle>
+								<EmptyDescription>Be the first to share your thoughts!</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
 					) : (
 						comments?.map((item) => (
 							<div key={item.id} className="flex gap-3">

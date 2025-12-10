@@ -34,7 +34,7 @@ const Sidebar = async () => {
 	];
 
 	return (
-		<div className="absolute top-6 right-6 space-y-6 max-lg:hidden">
+		<div className="no-scrollbar absolute top-6 right-6 bottom-6 space-y-6 overflow-y-auto max-lg:hidden">
 			{cards
 				.filter((item) => item.data.length != 0)
 				.map((item) => (

@@ -1,8 +1,8 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { use, useRef } from 'react';
 import useSWR from 'swr';
 
@@ -17,6 +17,7 @@ type PostIdPageProps = {
 
 const PostIdPage = ({ params }: PostIdPageProps) => {
 	const { id } = use(params);
+	const router = useRouter();
 	const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const { data: post, isLoading, error } = useSWR(`post-${id}`, () => getPostById(id));
@@ -45,11 +46,9 @@ const PostIdPage = ({ params }: PostIdPageProps) => {
 	return (
 		<div className="space-y-4 xl:mx-8">
 			<div>
-				<Button asChild variant="ghost" size="sm" className="-ml-2">
-					<Link href="/">
-						<ArrowLeft className="mr-2 h-4 w-4" />
-						Back
-					</Link>
+				<Button variant="ghost" size="sm" className="-ml-2" onClick={() => router.back()}>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Back
 				</Button>
 			</div>
 
