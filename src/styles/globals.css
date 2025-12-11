@@ -39,7 +39,7 @@
 	--font-sans: sans-serif;
 	--font-serif: serif;
 	--font-mono: monospace;
-	--radius: 0.5rem;
+	--radius: 0.75rem;
 	--shadow-x: 0px;
 	--shadow-y: 2px;
 	--shadow-blur: 8px;
@@ -91,7 +91,7 @@
 	--sidebar-accent-foreground: oklch(0.92 0 0);
 	--sidebar-border: oklch(0.25 0 0);
 	--sidebar-ring: oklch(0.6 0.15 25);
-	--radius: 0.5rem;
+	--radius: 0.75rem;
 	--shadow-x: 0px;
 	--shadow-y: 2px;
 	--shadow-blur: 8px;
