@@ -3,34 +3,29 @@
 import { Heart, Loader2, MessageSquareDashed, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import useSWR from 'swr';
 
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Textarea } from '~/components/ui/textarea';
 import UserAvatar from '~/components/user-avatar';
-import { createComment, getCommentsByPostId, toggleLikeComment } from '~/services/comment';
+import { CommentItem, createComment, toggleLikeComment } from '~/services/comment';
 
 type TextareaRef = React.RefObject<HTMLTextAreaElement | null> | React.MutableRefObject<HTMLTextAreaElement | null>;
 
 type PostCommentsProps = {
 	postId: string;
 	textareaRef?: TextareaRef;
+	initialComments: CommentItem[];
 };
 
-const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
+const PostComments = ({ postId, textareaRef, initialComments }: PostCommentsProps) => {
 	const internalRef = useRef<HTMLTextAreaElement | null>(null);
 	const commentRef = textareaRef ?? internalRef;
 	const [comment, setComment] = useState('');
+	const [comments, setComments] = useState<CommentItem[]>(initialComments);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [likingId, setLikingId] = useState<string | null>(null);
-
-	const { data: comments, isLoading, error, mutate } = useSWR(`post-${postId}-comments`, () => getCommentsByPostId(postId));
-
-	if (error) {
-		throw error;
-	}
 
 	const focusCommentInput = () => {
 		commentRef.current?.focus();
@@ -48,11 +43,10 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 		setIsSubmitting(true);
 
 		try {
-			await createComment({ postId, content });
+			const newComment = await createComment({ postId, content });
+			setComments((prev) => [...prev, newComment]);
 			setComment('');
-			await mutate();
 		} catch (err) {
-			// keep silent here; caller page can handle toasts if needed
 			console.error(err);
 		} finally {
 			setIsSubmitting(false);
@@ -60,20 +54,21 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 	};
 
 	const handleToggleLike = async (commentId: string) => {
-		if (!comments) return;
+		const targetComment = comments.find((c) => c.id === commentId);
+		if (!targetComment) return;
 
-		const optimistic = comments.map((c) => (c.id === commentId ? { ...c, isLiked: !c.isLiked, likesCount: c.likesCount + (c.isLiked ? -1 : 1) } : c));
-
-		await mutate(optimistic, false);
+		// Optimistic update
+		setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, isLiked: !c.isLiked, likesCount: c.likesCount + (c.isLiked ? -1 : 1) } : c)));
 
 		setLikingId(commentId);
 		try {
 			await toggleLikeComment(commentId);
-			await mutate();
+			// No need to refetch if successful, optimistic update is sufficient
+			// Or we could revert on error
 		} catch (err) {
 			console.error(err);
-			// fallback revalidation to correct state if error
-			await mutate();
+			// Revert optimistic update
+			setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, isLiked: !c.isLiked, likesCount: c.likesCount + (c.isLiked ? -1 : 1) } : c)));
 		} finally {
 			setLikingId(null);
 		}
@@ -100,12 +95,10 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 					</div>
 				</div>
 
-				<div className="text-muted-foreground text-sm">Comments ({comments?.length ?? 0})</div>
+				<div className="text-muted-foreground text-sm">Comments ({comments.length})</div>
 
 				<div className="space-y-3">
-					{isLoading ? (
-						<p className="text-muted-foreground text-sm">Loading comments...</p>
-					) : (comments?.length ?? 0) === 0 ? (
+					{comments.length === 0 ? (
 						<Empty className="py-8">
 							<EmptyMedia>
 								<MessageSquareDashed className="text-muted-foreground size-10" />
@@ -116,7 +109,7 @@ const PostComments = ({ postId, textareaRef }: PostCommentsProps) => {
 							</EmptyHeader>
 						</Empty>
 					) : (
-						comments?.map((item) => (
+						comments.map((item) => (
 							<div key={item.id} className="flex gap-3">
 								<Link href={`/users/${item.user.id}`}>
 									<UserAvatar className="size-10" user={item.user} />

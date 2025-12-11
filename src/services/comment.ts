@@ -86,16 +86,27 @@ export const createComment = async ({ postId, content, replyCommentId = null }: 
 		throw new Error('Unauthorized');
 	}
 
-	const { error } = await supabase.from('comments').insert({
-		post_id: postId,
-		content,
-		reply_comment_id: replyCommentId,
-		user_id: user.id,
-	});
+	const { data, error } = await supabase
+		.from('comments')
+		.insert({
+			post_id: postId,
+			content,
+			reply_comment_id: replyCommentId,
+			user_id: user.id,
+		})
+		.select('id, content, created_at, post_id, reply_comment_id, user_id, user:users!comments_user_id_fkey(id, name, avatar, bio)')
+		.single();
 
 	if (error) {
 		throw error;
 	}
+
+	return {
+		...data,
+		user: data.user as PostAuthor,
+		likesCount: 0,
+		isLiked: false,
+	} as CommentItem;
 };
 
 export const toggleLikeComment = async (commentId: string) => {

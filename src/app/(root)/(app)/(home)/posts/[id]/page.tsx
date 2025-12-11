@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import PostDetail from './post-detail';
+import { getCommentsByPostId } from '~/services/comment';
 import { getPostById } from '~/services/post';
 
 type PostIdPageProps = {
@@ -9,13 +10,13 @@ type PostIdPageProps = {
 
 const PostIdPage = async ({ params }: PostIdPageProps) => {
 	const { id } = await params;
-	const post = await getPostById(id);
+	const [post, comments] = await Promise.all([getPostById(id), getCommentsByPostId(id)]);
 
 	if (!post) {
 		return notFound();
 	}
 
-	return <PostDetail post={post} />;
+	return <PostDetail post={post} comments={comments} />;
 };
 
 export default PostIdPage;

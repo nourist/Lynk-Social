@@ -7,13 +7,15 @@ import { useRef, useState } from 'react';
 import PostComments from './post-comments';
 import { PostCard } from '~/components/post-list';
 import { Button } from '~/components/ui/button';
+import { CommentItem } from '~/services/comment';
 import { PostItem } from '~/services/post';
 
 interface PostDetailProps {
 	post: PostItem;
+	comments: CommentItem[];
 }
 
-const PostDetail = ({ post: initialPost }: PostDetailProps) => {
+const PostDetail = ({ post: initialPost, comments }: PostDetailProps) => {
 	const router = useRouter();
 	const [post] = useState(initialPost);
 	const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -34,7 +36,7 @@ const PostDetail = ({ post: initialPost }: PostDetailProps) => {
 
 			<PostCard post={{ ...post, comment_count: undefined }} onCommentClick={focusCommentInput} />
 
-			<PostComments postId={post.id} textareaRef={commentInputRef} />
+			<PostComments postId={post.id} textareaRef={commentInputRef} initialComments={comments} />
 		</div>
 	);
 };
