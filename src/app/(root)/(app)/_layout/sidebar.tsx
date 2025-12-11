@@ -1,6 +1,6 @@
 'use client';
 
-import { House, Search, UsersRound } from 'lucide-react';
+import { Bookmark, House, Search, UsersRound } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -38,6 +38,7 @@ const Sidebar = () => {
 	const navItems = [
 		{ name: 'Home', href: '/', icon: House },
 		{ name: 'Explore', href: '/explore', icon: Search },
+		{ name: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
 		{ name: 'People', href: '/users', icon: UsersRound },
 	];
 

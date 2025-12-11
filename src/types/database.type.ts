@@ -291,6 +291,36 @@ export type Database = {
 					},
 				];
 			};
+			user_mark_posts: {
+				Row: {
+					post_id: string;
+					user_id: string;
+				};
+				Insert: {
+					post_id: string;
+					user_id?: string;
+				};
+				Update: {
+					post_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'user_mark_posts_post_id_fkey';
+						columns: ['post_id'];
+						isOneToOne: false;
+						referencedRelation: 'posts';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'user_mark_posts_user_id_fkey';
+						columns: ['user_id'];
+						isOneToOne: false;
+						referencedRelation: 'users';
+						referencedColumns: ['id'];
+					},
+				];
+			};
 			users: {
 				Row: {
 					avatar: string | null;
@@ -323,15 +353,35 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			get_explore_posts: {
+			get_bookmarked_posts: {
 				Args: { p_limit: number; p_offset: number; p_user_id: string };
 				Returns: {
 					author: Json;
+					comment_count: number;
 					content: string;
 					created_at: string;
 					id: string;
 					image: string;
 					is_liked: boolean;
+					is_marked: boolean;
+					like_count: number;
+					title: string;
+					total_count: number;
+					video: string;
+				}[];
+			};
+			get_explore_posts: {
+				Args: { p_limit: number; p_offset: number; p_user_id: string };
+				Returns: {
+					author: Json;
+					comment_count: number;
+					content: string;
+					created_at: string;
+					id: string;
+					image: string;
+					is_liked: boolean;
+					is_marked: boolean;
+					like_count: number;
 					title: string;
 					total_count: number;
 					video: string;
@@ -341,11 +391,14 @@ export type Database = {
 				Args: { p_limit: number; p_offset: number; p_user_id: string };
 				Returns: {
 					author: Json;
+					comment_count: number;
 					content: string;
 					created_at: string;
 					id: string;
 					image: string;
 					is_liked: boolean;
+					is_marked: boolean;
+					like_count: number;
 					title: string;
 					total_count: number;
 					video: string;
@@ -379,6 +432,28 @@ export type Database = {
 					name: string;
 					total_users: number;
 					user_id: string;
+				}[];
+			};
+			get_user_posts: {
+				Args: {
+					p_current_user_id: string;
+					p_limit: number;
+					p_offset: number;
+					p_target_user_id: string;
+				};
+				Returns: {
+					author: Json;
+					comment_count: number;
+					content: string;
+					created_at: string;
+					id: string;
+					image: string;
+					is_liked: boolean;
+					is_marked: boolean;
+					like_count: number;
+					title: string;
+					total_count: number;
+					video: string;
 				}[];
 			};
 		};

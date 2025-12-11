@@ -32,7 +32,7 @@ const PostDetail = ({ post: initialPost }: PostDetailProps) => {
 				</Button>
 			</div>
 
-			<PostCard post={post} onCommentClick={focusCommentInput} />
+			<PostCard post={{ ...post, comment_count: undefined }} onCommentClick={focusCommentInput} />
 
 			<PostComments postId={post.id} textareaRef={commentInputRef} />
 		</div>

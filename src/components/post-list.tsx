@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, MessageCircle } from 'lucide-react';
+import { Bookmark, Heart, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import InfiniteScroll from '~/components/infinity-scroll';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import UserAvatar from '~/components/user-avatar';
-import { PostItem, type getExplorePosts, getHomePosts, toggleLikePost } from '~/services/post';
+import { PostItem, type getExplorePosts, getHomePosts, toggleBookmarkPost, toggleLikePost } from '~/services/post';
 
 type PostFetcher = ({ limit, offset }: { limit: number; offset: number }) => ReturnType<typeof getHomePosts | typeof getExplorePosts>;
 
@@ -21,7 +21,7 @@ interface Props {
 }
 
 interface PostCardProps {
-	post: PostItem;
+	post: Omit<PostItem, 'comment_count'> & { comment_count?: number };
 	onCommentClick?: () => void;
 }
 
@@ -34,14 +34,28 @@ interface PostPageProps {
 const PostCard = ({ post, onCommentClick }: PostCardProps) => {
 	const router = useRouter();
 	const [isLiked, setIsLiked] = useState(post.isLiked);
+	const [likeCount, setLikeCount] = useState(post.like_count);
+	const [isMarked, setIsMarked] = useState(post.isMarked);
 
 	const handleLike = async () => {
 		try {
 			setIsLiked((prev) => !prev);
+			setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
 			await toggleLikePost(post.id);
 		} catch {
 			toast.error('Error while liking the post');
 			setIsLiked((prev) => !prev);
+			setLikeCount((prev) => (isLiked ? prev + 1 : prev - 1));
+		}
+	};
+
+	const handleBookmark = async () => {
+		try {
+			setIsMarked((prev) => !prev);
+			await toggleBookmarkPost(post.id);
+		} catch {
+			toast.error('Error while bookmarking the post');
+			setIsMarked((prev) => !prev);
 		}
 	};
 
@@ -96,11 +110,15 @@ const PostCard = ({ post, onCommentClick }: PostCardProps) => {
 				<div className="flex items-center gap-2 border-t pt-4">
 					<Button variant="ghost" size="sm" onClick={handleLike} className={isLiked ? 'text-red-500 hover:text-red-600' : ''}>
 						<Heart className={isLiked ? 'fill-current' : ''} />
-						Like
+						{likeCount}
 					</Button>
 					<Button variant="ghost" size="sm" onClick={handleComment}>
 						<MessageCircle />
-						Comment
+						{post.comment_count}
+					</Button>
+					<div className="flex-1" />
+					<Button variant="ghost" size="icon-sm" onClick={handleBookmark} className={isMarked ? 'text-blue-500 hover:text-blue-600' : ''}>
+						<Bookmark className={isMarked ? 'fill-current' : ''} />
 					</Button>
 				</div>
 			</CardContent>
@@ -128,8 +146,10 @@ export const PostSkeleton = () => (
 			<div className="bg-muted h-60 w-full rounded-md" />
 
 			<div className="flex items-center gap-2 border-t pt-4">
-				<div className="bg-muted h-8 w-20 rounded" />
-				<div className="bg-muted h-8 w-28 rounded" />
+				<div className="bg-muted h-8 w-12 rounded" />
+				<div className="bg-muted h-8 w-12 rounded" />
+				<div className="flex-1" />
+				<div className="bg-muted h-8 w-8 rounded" />
 			</div>
 		</CardContent>
 	</Card>

@@ -46,6 +46,9 @@ export type PostAuthor = Pick<Tables<'users'>, 'id' | 'name' | 'avatar' | 'bio'>
 export type PostItem = Pick<Tables<'posts'>, 'id' | 'title' | 'content' | 'image' | 'video' | 'created_at'> & {
 	author: PostAuthor;
 	isLiked: boolean;
+	isMarked: boolean;
+	like_count: number;
+	comment_count: number;
 };
 
 export type PostListResponse = {
@@ -81,6 +84,9 @@ export const getHomePosts = async ({ limit = 20, offset = 0 }: PaginationParams 
 				...post,
 				author: post.author as PostAuthor,
 				isLiked: post.is_liked,
+				isMarked: post.is_marked,
+				like_count: post.like_count,
+				comment_count: post.comment_count,
 			})) ?? [],
 		count: data?.[0]?.total_count ?? 0,
 	};
@@ -109,6 +115,40 @@ export const getExplorePosts = async ({ limit = 20, offset = 0 }: PaginationPara
 				...post,
 				author: post.author as PostAuthor,
 				isLiked: post.is_liked,
+				isMarked: post.is_marked,
+				like_count: post.like_count,
+				comment_count: post.comment_count,
+			})) ?? [],
+		count: data?.[0]?.total_count ?? 0,
+	};
+};
+
+export const getBookmarkedPosts = async ({ limit = 20, offset = 0 }: PaginationParams = {}): Promise<PostListResponse> => {
+	const supabase = await createClient();
+
+	const {
+		data: { user },
+		error: authError,
+	} = await supabase.auth.getUser();
+	if (authError || !user) throw new Error('Unauthorized');
+
+	const { data, error } = await supabase.rpc('get_bookmarked_posts', {
+		p_user_id: user.id,
+		p_limit: limit,
+		p_offset: offset,
+	});
+
+	if (error) throw error;
+
+	return {
+		data:
+			data?.map((post) => ({
+				...post,
+				author: post.author as PostAuthor,
+				isLiked: post.is_liked,
+				isMarked: post.is_marked,
+				like_count: post.like_count,
+				comment_count: post.comment_count,
 			})) ?? [],
 		count: data?.[0]?.total_count ?? 0,
 	};
@@ -156,6 +196,48 @@ export const toggleLikePost = async (postId: string) => {
 	}
 };
 
+export const toggleBookmarkPost = async (postId: string) => {
+	const supabase = await createClient();
+
+	const {
+		data: { user },
+		error: authError,
+	} = await supabase.auth.getUser();
+
+	if (authError) {
+		throw authError;
+	}
+
+	if (!user) {
+		throw new Error('Unauthorized');
+	}
+
+	// Check if already marked
+	const { data: existingMark, error: checkError } = await supabase.from('user_mark_posts').select().eq('post_id', postId).eq('user_id', user.id).maybeSingle();
+
+	if (checkError) {
+		throw checkError;
+	}
+
+	if (existingMark) {
+		// Unmark
+		const { error: deleteError } = await supabase.from('user_mark_posts').delete().eq('post_id', postId).eq('user_id', user.id);
+
+		if (deleteError) {
+			throw deleteError;
+		}
+		return { marked: false };
+	} else {
+		// Mark
+		const { error: insertError } = await supabase.from('user_mark_posts').insert({ post_id: postId, user_id: user.id });
+
+		if (insertError) {
+			throw insertError;
+		}
+		return { marked: true };
+	}
+};
+
 export const getPostLikesCount = async (postId: string) => {
 	const supabase = await createClient();
 
@@ -171,6 +253,10 @@ export const getPostLikesCount = async (postId: string) => {
 export const getPostById = async (postId: string): Promise<PostItem | null> => {
 	const supabase = await createClient();
 
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
 	const { data, error } = await supabase
 		.from('posts')
 		.select('id, title, content, image, video, created_at, author:users!posts_author_id_fkey(id, name, avatar, bio)')
@@ -184,7 +270,21 @@ export const getPostById = async (postId: string): Promise<PostItem | null> => {
 		throw error;
 	}
 
-	return data as PostItem;
+	const [likeCountRes, commentCountRes, isLikedRes, isMarkedRes] = await Promise.all([
+		supabase.from('user_like_posts').select('*', { count: 'exact', head: true }).eq('post_id', postId),
+		supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', postId),
+		user ? supabase.from('user_like_posts').select('post_id').eq('post_id', postId).eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+		user ? supabase.from('user_mark_posts').select('post_id').eq('post_id', postId).eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+	]);
+
+	return {
+		...(data as unknown as PostItem),
+		author: data.author as PostAuthor,
+		like_count: likeCountRes.count ?? 0,
+		comment_count: commentCountRes.count ?? 0,
+		isLiked: !!isLikedRes.data,
+		isMarked: !!isMarkedRes.data,
+	};
 };
 
 export const getPostsByUserId = async (userId: string, { limit = 20, offset = 0 }: PaginationParams = {}): Promise<PostListResponse> => {
@@ -196,35 +296,25 @@ export const getPostsByUserId = async (userId: string, { limit = 20, offset = 0 
 	} = await supabase.auth.getUser();
 	if (authError || !user) throw new Error('Unauthorized');
 
-	// Get posts by user ID with pagination
-	const {
-		data: posts,
-		error: postsError,
-		count,
-	} = await supabase
-		.from('posts')
-		.select('id, title, content, image, video, created_at, author:users!posts_author_id_fkey(id, name, avatar, bio)', {
-			count: 'exact',
-		})
-		.eq('author_id', userId)
-		.order('created_at', { ascending: false })
-		.range(offset, offset + limit - 1);
+	const { data, error } = await supabase.rpc('get_user_posts', {
+		p_target_user_id: userId,
+		p_current_user_id: user.id,
+		p_limit: limit,
+		p_offset: offset,
+	});
 
-	if (postsError) throw postsError;
-
-	// Get liked posts for current user
-	const postIds = posts?.map((post) => post.id) ?? [];
-	const { data: likedPosts } = await supabase.from('user_like_posts').select('post_id').eq('user_id', user.id).in('post_id', postIds);
-
-	const likedPostIds = new Set(likedPosts?.map((lp) => lp.post_id) ?? []);
+	if (error) throw error;
 
 	return {
 		data:
-			posts?.map((post) => ({
+			data?.map((post) => ({
 				...post,
 				author: post.author as PostAuthor,
-				isLiked: likedPostIds.has(post.id),
+				isLiked: post.is_liked,
+				isMarked: post.is_marked,
+				like_count: post.like_count,
+				comment_count: post.comment_count,
 			})) ?? [],
-		count: count ?? 0,
+		count: data?.[0]?.total_count ?? 0,
 	};
 };
