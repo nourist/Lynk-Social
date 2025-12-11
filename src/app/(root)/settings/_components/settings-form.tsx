@@ -109,82 +109,76 @@ const SettingsForm = ({ user }: Props) => {
 	const displayName = form.watch('name') || user.name;
 
 	return (
-		<Card className="flex-1 p-6">
-			<div className="flex flex-col gap-1 pb-4">
-				<h1 className="text-2xl font-semibold">Settings</h1>
-				<p className="text-muted-foreground text-sm">Update your public profile information.</p>
-			</div>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-				<Controller
-					name="name"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel>Name</FieldLabel>
-							<Input className="bg-muted" placeholder="Enter your name" {...field} aria-invalid={fieldState.invalid} />
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
+		<Card className="flex-1 overflow-hidden pt-0">
+			<div className="relative">
+				<div className="group bg-muted/30 relative h-48 w-full overflow-hidden sm:h-64">
+					{thumbnailUpload.preview ? (
+						/* eslint-disable-next-line @next/next/no-img-element */
+						<img src={thumbnailUpload.preview} alt="Thumbnail preview" className="h-full w-full object-cover" />
+					) : (
+						<div className="text-muted-foreground flex h-full items-center justify-center text-sm">No cover image</div>
 					)}
-				/>
-				<Controller
-					name="bio"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel>Bio</FieldLabel>
-							<Textarea className="bg-muted wrap-break-word" placeholder="Tell people about yourself" {...field} aria-invalid={fieldState.invalid} />
+					<button
+						type="button"
+						onClick={thumbnailUpload.openPicker}
+						className="absolute top-4 right-4 flex items-center justify-center rounded-full bg-black/50 p-2 text-white opacity-0 transition group-hover:opacity-100 hover:bg-black/70 hover:opacity-100"
+						title="Change cover photo"
+					>
+						<Camera className="size-5" />
+					</button>
+					<input ref={thumbnailUpload.inputRef} type="file" accept="image/*" className="hidden" onChange={thumbnailUpload.handleChange} />
+				</div>
 
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
-				/>
-				<div className="grid gap-6 md:grid-cols-2">
-					<Field>
-						<div className="flex flex-col gap-2">
-							<FieldLabel>Thumbnail</FieldLabel>
-							<div className="group bg-muted/30 relative h-36 overflow-hidden rounded-lg border">
-								{thumbnailUpload.preview ? (
-									/* eslint-disable-next-line @next/next/no-img-element */
-									<img src={thumbnailUpload.preview} alt="Thumbnail preview" className="h-full w-full object-cover" />
-								) : (
-									<div className="text-muted-foreground flex h-full items-center justify-center text-sm">No thumbnail</div>
-								)}
-								<button
-									type="button"
-									onClick={thumbnailUpload.openPicker}
-									className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition group-hover:opacity-100 hover:opacity-100"
-									aria-label="Change thumbnail"
-								>
-									<Camera className="size-5" />
-								</button>
-								<input ref={thumbnailUpload.inputRef} type="file" accept="image/*" className="hidden" onChange={thumbnailUpload.handleChange} />
-							</div>
-						</div>
-					</Field>
-					<Field>
-						<div className="space-y-2">
-							<FieldLabel>Avatar</FieldLabel>
-							<div className="group relative inline-flex">
-								<UserAvatar user={{ name: displayName, avatar: avatarUpload.preview }} className="size-36" />
-								<button
-									type="button"
-									onClick={avatarUpload.openPicker}
-									className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition group-hover:opacity-100 hover:opacity-100"
-									aria-label="Change avatar"
-								>
-									<Camera className="size-5" />
-								</button>
-								<input ref={avatarUpload.inputRef} type="file" accept="image/*" className="hidden" onChange={avatarUpload.handleChange} />
-							</div>
-						</div>
-					</Field>
+				<div className="absolute -bottom-16 left-6 sm:left-10">
+					<div className="group relative inline-flex">
+						<UserAvatar user={{ name: displayName, avatar: avatarUpload.preview }} className="ring-background size-32 ring-4 sm:size-40" />
+						<button
+							type="button"
+							onClick={avatarUpload.openPicker}
+							className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition group-hover:opacity-100 hover:opacity-100"
+							title="Change profile photo"
+						>
+							<Camera className="size-8" />
+						</button>
+						<input ref={avatarUpload.inputRef} type="file" accept="image/*" className="hidden" onChange={avatarUpload.handleChange} />
+					</div>
 				</div>
-				<div className="flex justify-end">
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Saving...' : 'Save changes'}
-					</Button>
-				</div>
-			</form>
+			</div>
+
+			<div className="mt-20 px-6 sm:px-10">
+				<form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+					<div className="grid gap-6 md:grid-cols-2">
+						<Controller
+							name="name"
+							control={form.control}
+							render={({ field, fieldState }) => (
+								<Field data-invalid={fieldState.invalid}>
+									<FieldLabel>Display Name</FieldLabel>
+									<Input placeholder="Enter your name" {...field} aria-invalid={fieldState.invalid} />
+									{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+								</Field>
+							)}
+						/>
+						<Controller
+							name="bio"
+							control={form.control}
+							render={({ field, fieldState }) => (
+								<Field data-invalid={fieldState.invalid} className="md:col-span-2">
+									<FieldLabel>Bio</FieldLabel>
+									<Textarea className="min-h-32 wrap-break-word" placeholder="Tell people about yourself" {...field} aria-invalid={fieldState.invalid} />
+									{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+								</Field>
+							)}
+						/>
+					</div>
+
+					<div className="flex justify-end">
+						<Button type="submit" disabled={isSubmitting} size="lg">
+							{isSubmitting ? 'Saving...' : 'Save Changes'}
+						</Button>
+					</div>
+				</form>
+			</div>
 		</Card>
 	);
 };

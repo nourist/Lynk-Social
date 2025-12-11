@@ -7,7 +7,7 @@ import { useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
-import { Textarea } from '~/components/ui/textarea';
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea } from '~/components/ui/input-group';
 import UserAvatar from '~/components/user-avatar';
 import { CommentItem, createComment, toggleLikeComment } from '~/services/comment';
 
@@ -77,23 +77,16 @@ const PostComments = ({ postId, textareaRef, initialComments }: PostCommentsProp
 	return (
 		<Card>
 			<CardContent className="space-y-4">
-				<div className="border-input focus-within:ring-ring/50 bg-background/40 focus-within:border-ring flex flex-col gap-2 rounded-lg border px-3 pt-2 pb-3 shadow-sm transition focus-within:ring-2">
-					<Textarea
-						ref={commentRef}
-						placeholder="Write a comment..."
-						value={comment}
-						onChange={(e) => setComment(e.target.value)}
-						className="min-h-24 border-none px-0 shadow-none focus-visible:ring-0"
-					/>
-
-					<div className="flex items-end justify-between gap-3">
+				<InputGroup className="bg-transparent">
+					<InputGroupTextarea ref={commentRef} placeholder="Write a comment..." value={comment} onChange={(e) => setComment(e.target.value)} className="min-h-24" />
+					<InputGroupAddon align="block-end" className="flex items-end justify-between gap-3">
 						<span className="text-muted-foreground text-xs">Add your comment</span>
-						<Button onClick={handleSubmit} disabled={isSubmitting || !comment.trim()} size="sm">
+						<InputGroupButton variant="default" onClick={handleSubmit} disabled={isSubmitting || !comment.trim()} size="sm">
 							{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
 							Send
-						</Button>
-					</div>
-				</div>
+						</InputGroupButton>
+					</InputGroupAddon>
+				</InputGroup>
 
 				<div className="text-muted-foreground text-sm">Comments ({comments.length})</div>
 

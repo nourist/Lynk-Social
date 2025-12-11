@@ -7,7 +7,7 @@ interface Props {
 const Layout = ({ children }: Props) => {
 	return (
 		<>
-			<div className="p-6 lg:pr-84">{children}</div>
+			<div className="p-6 lg:w-[calc(100%-312px)]">{children}</div>
 			<Sidebar />
 		</>
 	);
