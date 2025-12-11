@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useCallback } from 'react';
 
 import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { createClient } from '~/lib/supabase/client';
 
 const Login = () => {
@@ -20,23 +19,35 @@ const Login = () => {
 	}, [supabase]);
 
 	return (
-		<div className="absolute top-1/6 left-1/2 flex w-sm -translate-x-1/2 flex-col gap-4">
-			<div className="flex items-center justify-center gap-2 text-3xl font-bold">
-				<Image src="/logo.png" alt="logo" width={42} height={42} />
-				Lynk
+		<div className="relative container grid h-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
+			<div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
+				<div className="absolute inset-0 bg-zinc-900" />
+				<div className="relative z-20 flex items-center text-lg font-medium">
+					<div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1">
+						<Image src="/logo.png" alt="logo" width={32} height={32} />
+					</div>
+					Lynk
+				</div>
+				<div className="relative z-20 mt-auto">
+					<blockquote className="space-y-2">
+						<p className="text-lg">&ldquo;Connect with friends and the world around you on Lynk. Share what&apos;s new and life moments with your friends.&rdquo;</p>
+					</blockquote>
+				</div>
 			</div>
-			<Card className="flex-1">
-				<CardHeader className="text-2xl font-bold">
-					<CardTitle>Login</CardTitle>
-					<CardDescription>Sign in with your google account</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<Button variant="outline" className="w-full" onClick={handleLogin}>
-						<Image src="/google-logo.svg" alt="google logo" width={24} height={24} />
-						Continue with google
-					</Button>
-				</CardContent>
-			</Card>
+			<div className="lg:p-8">
+				<div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+					<div className="flex flex-col space-y-2 text-center">
+						<h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+						<p className="text-muted-foreground text-sm">Sign in to your account to continue</p>
+					</div>
+					<div className="grid gap-6">
+						<Button variant="outline" type="button" disabled={false} onClick={handleLogin}>
+							<Image src="/google-logo.svg" alt="google logo" width={24} height={24} className="mr-2" />
+							Continue with Google
+						</Button>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };
