@@ -1,12 +1,38 @@
 'use client';
 
 import { House, Search, UsersRound } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-import NavLink from '~/components/nav-link';
-import { Button, buttonVariants } from '~/components/ui/button';
+import { buttonVariants } from '~/components/ui/button';
 import { Dock, DockIcon } from '~/components/ui/dock';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
+import { cn } from '~/lib/utils';
+
+const SidebarItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType } }) => {
+	const pathname = usePathname();
+	const isActive = pathname === item.href;
+
+	return (
+		<Link
+			href={item.href}
+			className={cn(
+				'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors outline-none',
+				isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+			)}
+		>
+			{isActive && (
+				<motion.div layoutId="sidebar-active" className="bg-secondary/80 absolute inset-0 rounded-xl" transition={{ type: 'spring', stiffness: 300, damping: 30 }} />
+			)}
+
+			<span className="relative z-10 flex items-center gap-3">
+				<item.icon className={cn('size-5 transition-colors', isActive && 'fill-primary/20')} />
+				<span className="text-base">{item.name}</span>
+			</span>
+		</Link>
+	);
+};
 
 const Sidebar = () => {
 	const navItems = [
@@ -17,15 +43,15 @@ const Sidebar = () => {
 
 	return (
 		<>
-			<div className="bg-card *:data-[active=true]:text-primary *:bg-secondary/70 *:hover:bg-secondary w-80 space-y-4 border-r p-6 *:h-12 *:w-full *:justify-start *:px-8! max-md:hidden">
-				{navItems.map((item) => (
-					<Button key={item.name} size="lg" variant="secondary" asChild>
-						<NavLink href={item.href}>
-							<item.icon />
-							{item.name}
-						</NavLink>
-					</Button>
-				))}
+			<div className="bg-card w-72 space-y-2 border-r p-3 max-md:hidden">
+				<div className="mb-2 px-3 py-2">
+					<p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Navigation</p>
+				</div>
+				<nav className="flex flex-col gap-1">
+					{navItems.map((item) => (
+						<SidebarItem key={item.name} item={item} />
+					))}
+				</nav>
 			</div>
 			{/* Magic dock for md screen */}
 			<div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 md:hidden">
