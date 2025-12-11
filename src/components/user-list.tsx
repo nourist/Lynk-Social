@@ -32,9 +32,9 @@ const UserCard = ({ user }: UserCardProps) => {
 			<CardContent>
 				<Link className="flex items-center justify-center gap-2" href={`/users/${user.id}`}>
 					<UserAvatar className="size-12" user={user} />
-					<div className="max-w-65 min-w-55 flex-1 space-y-1">
-						<div className="font-bold">{user.name}</div>
-						<div className="text-muted-foreground truncate overflow-hidden text-sm">{user.bio}</div>
+					<div className="max-w-[70%] flex-1 space-y-1">
+						<div className="max-w-full overflow-hidden font-bold text-nowrap text-ellipsis">{user.name}</div>
+						<div className="text-muted-foreground w-full truncate overflow-hidden text-sm">{user.bio}</div>
 					</div>
 				</Link>
 			</CardContent>
@@ -43,7 +43,7 @@ const UserCard = ({ user }: UserCardProps) => {
 };
 
 const UserSkeleton = () => (
-	<Card className="w-fit animate-pulse">
+	<Card className="animate-pulse">
 		<CardContent className="flex items-center justify-center gap-2">
 			<div className="bg-muted size-12 rounded-full" />
 			<div className="max-w-65 min-w-55 space-y-1">
@@ -75,15 +75,11 @@ const UserPage = ({ fetcher, offset, type }: UserPageProps) => {
 };
 
 const UserList = ({ fetcher, type }: Props) => {
-	const [cnt, setCnt] = useState(0);
-	const { data, isLoading, error } = useSWR(`${type}-users-0`, () => fetcher({ limit: 20, offset: 0 }));
+	const [cnt, setCnt] = useState(1);
+	const { data, error } = useSWR(`${type}-users-0`, () => fetcher({ limit: 20, offset: 0 }));
 
 	if (error) {
 		throw error;
-	}
-
-	if (isLoading) {
-		return <UserSkeleton />;
 	}
 
 	return (
@@ -93,7 +89,7 @@ const UserList = ({ fetcher, type }: Props) => {
 				setCnt((prev: number) => prev + 1);
 			}}
 		>
-			<div className="flex flex-wrap gap-6">
+			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{Array.from({ length: cnt }, (_, i) => (
 					<UserPage fetcher={fetcher} offset={i * 20} type={type} key={i} />
 				))}

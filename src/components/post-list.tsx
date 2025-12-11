@@ -156,7 +156,7 @@ const PostPage = ({ fetcher, offset, type }: PostPageProps) => {
 };
 
 const PostList = ({ fetcher, type }: Props) => {
-	const [cnt, setCnt] = useState(0);
+	const [cnt, setCnt] = useState(1);
 
 	const { data, isLoading, error } = useSWR(`${type}-posts-0`, () => fetcher({ limit: 20, offset: 0 }));
 

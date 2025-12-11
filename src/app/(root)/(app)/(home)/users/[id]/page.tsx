@@ -10,10 +10,10 @@ interface Props {
 }
 
 const UserProfile = async ({ params }: Props) => {
-	const user = await getUserById((await params).id);
-	const currentUser = await getCurrentUser();
-	const isFollowed = await isUserFollowed(currentUser.id, user.id);
-	const stats = await getUserStatById(user.id);
+	const userId = (await params).id;
+
+	const [user, currentUser] = await Promise.all([getUserById(userId), getCurrentUser()]);
+	const [isFollowed, stats] = await Promise.all([isUserFollowed(currentUser.id, user.id), getUserStatById(user.id)]);
 
 	return (
 		<div className="space-y-6 xl:mx-8">

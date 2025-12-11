@@ -1,62 +1,21 @@
-'use client';
-
-import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import { use, useRef } from 'react';
-import useSWR from 'swr';
 
-import PostComments from './post-comments';
-import { PostCard, PostSkeleton } from '~/components/post-list';
-import { Button } from '~/components/ui/button';
+import PostDetail from './post-detail';
 import { getPostById } from '~/services/post';
 
 type PostIdPageProps = {
 	params: Promise<{ id: string }>;
 };
 
-const PostIdPage = ({ params }: PostIdPageProps) => {
-	const { id } = use(params);
-	const router = useRouter();
-	const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
+const PostIdPage = async ({ params }: PostIdPageProps) => {
+	const { id } = await params;
+	const post = await getPostById(id);
 
-	const { data: post, isLoading, error } = useSWR(`post-${id}`, () => getPostById(id));
-
-	if (error) {
-		throw error;
-	}
-
-	if (isLoading) {
-		return <PostSkeleton />;
-	}
-
-	if (post === null) {
+	if (!post) {
 		return notFound();
 	}
 
-	if (!post) {
-		return null;
-	}
-
-	const focusCommentInput = () => {
-		commentInputRef.current?.focus();
-		commentInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-	};
-
-	return (
-		<div className="space-y-4 xl:mx-8">
-			<div>
-				<Button variant="ghost" size="sm" className="-ml-2" onClick={() => router.back()}>
-					<ArrowLeft className="mr-2 h-4 w-4" />
-					Back
-				</Button>
-			</div>
-
-			<PostCard post={post} onCommentClick={focusCommentInput} />
-
-			<PostComments postId={id} textareaRef={commentInputRef} />
-		</div>
-	);
+	return <PostDetail post={post} />;
 };
 
 export default PostIdPage;
