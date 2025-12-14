@@ -16,7 +16,7 @@ type UseMediaUploadOptions = {
 	maxFiles?: number;
 };
 
-export const useMediaUpload = (options: UseMediaUploadOptions = {}) => {
+export const useMediaUpload = (options: UseMediaUploadOptions = {maxFiles: 20}) => {
 	const { imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'], videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm'], maxFiles = 10 } = options;
 
 	const [files, setFiles] = useState<MediaFile[]>([]);

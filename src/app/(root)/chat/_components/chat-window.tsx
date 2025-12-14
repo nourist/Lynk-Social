@@ -14,7 +14,7 @@ const ChatWindow = () => {
 	const { isLoading } = useChatStore();
 
 	if (isLoading) {
-		return <ChatEmptyState />;
+		return null;
 	}
 
 	if (!selectedId) {

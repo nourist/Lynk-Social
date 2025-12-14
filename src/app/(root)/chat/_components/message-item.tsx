@@ -1,4 +1,3 @@
-import UserAvatar from '~/components/user-avatar';
 import { ChatMessage } from '~/store/chat-store';
 
 type Props = {
@@ -19,6 +18,7 @@ const MessageItem = ({ message, friendId }: Props) => {
 				)}
 				{message.type === 'image' && message.image && (
 					<div className="overflow-hidden rounded-2xl">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={message.image} alt="Sent image" className="max-h-96 w-auto object-cover" />
 					</div>
 				)}

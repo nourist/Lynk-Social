@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import MessageItem from './message-item';
 import InfiniteScroll from '~/components/infinity-scroll';
@@ -14,14 +14,11 @@ interface MessageListProps {
 const MessageList = ({ friendId }: MessageListProps) => {
 	const { items, prependMessages } = useChatStore();
 	const [isLoading, setIsLoading] = useState(false);
+	const scrollRef = useRef(null);
 
 	const friend = items.find((item) => item.user.id === friendId);
 
-	if (!friend) return null;
-
-	const { messages, hasMore } = friend;
-
-	console.log(messages);
+	const { messages, hasMore } = friend || { messages: [], hasMore: false };
 
 	// Load more older messages
 	const loadMore = async () => {
@@ -41,7 +38,7 @@ const MessageList = ({ friendId }: MessageListProps) => {
 	};
 
 	return (
-		<div className="flex flex-1 flex-col gap-4 p-6">
+		<div ref={scrollRef} className="flex min-h-full flex-1 flex-col gap-4 p-6">
 			<InfiniteScroll loadMore={loadMore} hasMore={hasMore} align="start">
 				{messages.map((message) => {
 					return <MessageItem key={message.id} message={message} friendId={friendId} />;
