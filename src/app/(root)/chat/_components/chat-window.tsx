@@ -1,9 +1,32 @@
-interface ChatWindowProps {
-	selectedId: string;
-}
+'use client';
 
-const ChatWindow = ({ selectedId }: ChatWindowProps) => {
-	return <div className="text-muted-foreground p-4">Chat with ID: {selectedId}</div>;
+import { useSearchParams } from 'next/navigation';
+
+import ChatEmptyState from './chat-empty-state';
+import ChatInput from './chat-input';
+import MessageList from './message-list';
+import { useChatStore } from '~/store/chat-store';
+
+const ChatWindow = () => {
+	const searchParams = useSearchParams();
+	const selectedId = searchParams.get('id');
+
+	const { isLoading } = useChatStore();
+
+	if (isLoading) {
+		return <ChatEmptyState />;
+	}
+
+	if (!selectedId) {
+		return <ChatEmptyState />;
+	}
+
+	return (
+		<>
+			<MessageList friendId={selectedId} />
+			<ChatInput receiverId={selectedId} />
+		</>
+	);
 };
 
 export default ChatWindow;

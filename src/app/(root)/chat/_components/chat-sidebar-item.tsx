@@ -26,7 +26,7 @@ const ChatSidebarItem = ({ item }: ChatSidebarItemProps) => {
 	const searchParams = useSearchParams();
 	const selectedId = searchParams.get('id');
 	const isActive = selectedId === item.user.id;
-	const lastMessage = item.messages[0];
+	const lastMessage = item.messages[item.messages.length - 1];
 
 	return (
 		<Link
@@ -43,7 +43,9 @@ const ChatSidebarItem = ({ item }: ChatSidebarItemProps) => {
 					<span className="truncate text-sm font-medium">{item.user.name}</span>
 					<span className="text-muted-foreground text-[10px]">{getRelativeTime(lastMessage?.created_at)}</span>
 				</div>
-				<p className="text-muted-foreground line-clamp-1 text-xs">{lastMessage?.content ?? 'Sent an attachment'}</p>
+				<p className="text-muted-foreground line-clamp-1 text-xs">
+					{lastMessage?.image ? 'Sent an image' : lastMessage?.video ? 'Sent a video' : (lastMessage?.content ?? 'Sent an attachment')}
+				</p>
 			</div>
 		</Link>
 	);

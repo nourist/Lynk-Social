@@ -4,9 +4,10 @@ interface InfiniteScrollProps {
 	loadMore: () => void; // hàm load thêm data
 	hasMore: boolean; // còn dữ liệu không
 	children: React.ReactNode;
+	align?: 'start' | 'end';
 }
 
-export default function InfiniteScroll({ loadMore, hasMore, children }: InfiniteScrollProps) {
+export default function InfiniteScroll({ loadMore, hasMore, children, align = 'end' }: InfiniteScrollProps) {
 	const sentinelRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -26,8 +27,9 @@ export default function InfiniteScroll({ loadMore, hasMore, children }: Infinite
 
 	return (
 		<>
+			{align == 'start' && <div ref={sentinelRef} className="h-1" />}
 			{children}
-			<div ref={sentinelRef} className="h-1" />
+			{align == 'end' && <div ref={sentinelRef} className="h-1" />}
 		</>
 	);
 }
