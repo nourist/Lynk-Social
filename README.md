@@ -1,5 +1,5 @@
 # Lynk-Social
-![Issues](https://img.shields.io/github/issues/nourist/Lynk-Social)
+
 ![Watchers](https://img.shields.io/github/watchers/nourist/Lynk-Social?style=social)
 ![Stars](https://img.shields.io/github/stars/nourist/Lynk-Social?style=social)
 
